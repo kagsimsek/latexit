@@ -1,0 +1,66 @@
+#!/bin/bash
+
+clear
+
+flag=0
+
+for var in tput latex dvisvgm dialog xclip 
+do
+  if [ -z $(which $var 2>/dev/null) ]
+  then
+    echo "checking if $var exists... no"
+    #echo "install $var to proceed."
+    flag=$((flag+1))
+  else
+    echo "checking if $var exists... yes"
+  fi
+done
+
+if [ $flag -ge 1 ]
+then
+  echo "missing software detected. ending session..."
+else
+
+  tmpfile=./latexit.tex
+
+  cat > $tmpfile <<EOL
+  %\documentclass[convert=pdf2svg,varwidth]{standalone}
+  \documentclass[12pt]{standalone}
+  \usepackage{amsmath,amssymb,mathrsfs,slashed}
+  \begin{document}
+EOL
+
+  ans=$HOME/.latexit_input
+  rm -f $ans 2>/dev/null
+  dialog --inputbox "LaTeXiT" 8 $(tput cols) 2>$ans
+  clear
+  if [ ! -s $ans ]
+  then
+    echo 'no input provided. ending session...'
+    echo ""
+  else
+    val=$(cat $ans)
+  
+    echo '\Large $ ' >> $tmpfile
+    echo "$val" >> $tmpfile
+    echo '$' >> $tmpfile
+    
+    cat >> $tmpfile <<EOL
+    \end{document}
+EOL
+  
+    latex -halt-on-error -shell-escape $tmpfile
+    if grep -q "No pages of output." latexit.log
+    then
+      clear
+      echo "error! check syntax."
+    else
+      dvisvgm --no-fonts latexit.dvi
+      rm latexit.png latexit.pdf latexit.tex latexit.log latexit.dvi latexit.aux $ans 2>/dev/null
+      clear
+      ls -lvtrhF
+    
+      echo "<img src='data:image/svg+xml;base64,"$(base64 -w0 latexit.svg)"' />" | xclip -selection clipboard -t text/html || screenshotfail
+    fi
+  fi
+fi
