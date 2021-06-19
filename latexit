@@ -9,7 +9,6 @@ do
   if [ -z $(which $var 2>/dev/null) ]
   then
     echo "checking if $var exists... no"
-    #echo "install $var to proceed."
     flag=$((flag+1))
   else
     echo "checking if $var exists... yes"
@@ -24,7 +23,6 @@ else
   tmpfile=./latexit.tex
 
   cat > $tmpfile <<EOL
-  %\documentclass[convert=pdf2svg,varwidth]{standalone}
   \documentclass[12pt]{standalone}
   \usepackage{amsmath,amssymb,mathrsfs,slashed}
   \begin{document}
@@ -54,6 +52,7 @@ EOL
     then
       clear
       echo "error! check syntax."
+      rm latexit.png latexit.pdf latexit.tex latexit.log latexit.dvi latexit.aux $ans 2>/dev/null
     else
       dvisvgm --no-fonts latexit.dvi
       rm latexit.png latexit.pdf latexit.tex latexit.log latexit.dvi latexit.aux $ans 2>/dev/null
