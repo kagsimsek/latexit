@@ -1,0 +1,9 @@
+#!/bin/bash
+
+if [ -z $1 ]
+then
+	echo "	svg2eps <svg file w/o extension>"
+else
+	inkscape $1.svg -o $1.eps --export-ignore-filters --export-ps-level=3
+	echo "'$1.eps' is ready!"
+fi
