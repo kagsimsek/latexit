@@ -9,6 +9,7 @@ do
   if [ -z $(which $var 2>/dev/null) ]
   then
     echo "checking if $var exists... no"
+    #echo "install $var to proceed."
     flag=$((flag+1))
   else
     echo "checking if $var exists... yes"
@@ -23,6 +24,7 @@ else
   tmpfile=./latexit.tex
 
   cat > $tmpfile <<EOL
+  %\documentclass[convert=pdf2svg,varwidth]{standalone}
   \documentclass[12pt]{standalone}
   \usepackage{amsmath,amssymb,mathrsfs,slashed}
   \begin{document}
@@ -55,11 +57,11 @@ EOL
       rm latexit.png latexit.pdf latexit.tex latexit.log latexit.dvi latexit.aux $ans 2>/dev/null
     else
       dvisvgm --no-fonts latexit.dvi
-      rm latexit.png latexit.pdf latexit.tex latexit.log latexit.dvi latexit.aux $ans 2>/dev/null
       clear
       ls -lvtrhF
-    
       echo "<img src='data:image/svg+xml;base64,"$(base64 -w0 latexit.svg)"' />" | xclip -selection clipboard -t text/html || screenshotfail
+      rm latexit.png latexit.pdf latexit.tex latexit.log latexit.dvi latexit.aux $ans 2>/dev/null
+      svg2eps latexit 2>/dev/null
     fi
   fi
 fi
